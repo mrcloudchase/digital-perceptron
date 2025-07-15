@@ -159,36 +159,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     cell.appendChild(rivet);
                 }
                 
-                // Add click event
-                cell.addEventListener('click', function() {
-                    const currentValue = parseInt(this.dataset.value);
-                    const newValue = currentValue === 1 ? 0 : 1;
-                    
-                    // Update visual state
-                    this.dataset.value = newValue;
-                    
-                    // Play switch flip sound effect if available
-                    const switchSound = document.getElementById('switch-sound');
-                    if (switchSound) {
-                        switchSound.currentTime = 0;
-                        switchSound.play();
-                    }
-                    
-                    // Add a slight bounce animation to the switch handle
-                    const switchHandle = this.querySelector('.switch-handle');
-                    if (switchHandle) {
-                        switchHandle.classList.add('flipping');
-                        setTimeout(() => {
-                            switchHandle.classList.remove('flipping');
-                        }, 300);
-                    }
-                    
-                    // Update the corresponding weight knob underglow
-                    updateWeightKnobUnderglow(row, col, newValue);
-                    
-                    // Send update to server
-                    updateInput(row, col, newValue);
-                });
+                // Add click event - reusing the same handler for consistency
+                cell.addEventListener('click', handleGridCellClick);
                 
                 inputGrid.appendChild(cell);
             }
@@ -220,18 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 minusBtn.dataset.col = col;
                 minusBtn.textContent = '-';
                 minusBtn.addEventListener('click', function() {
-                    const knob = document.getElementById(`weight-${row}-${col}`);
-                    const currentValue = parseFloat(knob.dataset.value) || 0;
-                    const learningRate = parseFloat(document.getElementById('learning-rate').value) || 0.1;
-                    
-                    // Decrement by learning rate value
-                    let newValue = currentValue - learningRate;
-                    // Clamp value between -3 and 3
-                    newValue = Math.max(-3, Math.min(3, newValue));
-                    
-                    updateKnobRotation(knob, newValue);
-                    document.getElementById(`weight-${row}-${col}-value`).textContent = newValue.toFixed(2);
-                    updateWeight(row, col, newValue);
+                    adjustWeightKnob(row, col, -1);
                 });
                 
                 // Weight knob
@@ -253,18 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 plusBtn.dataset.col = col;
                 plusBtn.textContent = '+';
                 plusBtn.addEventListener('click', function() {
-                    const knob = document.getElementById(`weight-${row}-${col}`);
-                    const currentValue = parseFloat(knob.dataset.value) || 0;
-                    const learningRate = parseFloat(document.getElementById('learning-rate').value) || 0.1;
-                    
-                    // Increment by learning rate value
-                    let newValue = currentValue + learningRate;
-                    // Clamp value between -3 and 3
-                    newValue = Math.max(-3, Math.min(3, newValue));
-                    
-                    updateKnobRotation(knob, newValue);
-                    document.getElementById(`weight-${row}-${col}-value`).textContent = newValue.toFixed(2);
-                    updateWeight(row, col, newValue);
+                    adjustWeightKnob(row, col, 1);
                 });
                 
                 // Weight value display
@@ -317,40 +267,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Setup input grid click handlers
+    // Setup input grid click handlers for initial static cells
     gridCells.forEach(cell => {
-        cell.addEventListener('click', function() {
-            const row = parseInt(this.dataset.row);
-            const col = parseInt(this.dataset.col);
-            const currentValue = parseInt(this.dataset.value);
-            const newValue = currentValue === 1 ? 0 : 1;
-            
-            // Update visual state
-            this.dataset.value = newValue;
-            
-            // Play switch flip sound effect if available
-            const switchSound = document.getElementById('switch-sound');
-            if (switchSound) {
-                switchSound.currentTime = 0;
-                switchSound.play();
-            }
-            
-            // Add a slight bounce animation to the switch handle
-            const switchHandle = this.querySelector('.switch-handle');
-            if (switchHandle) {
-                switchHandle.classList.add('flipping');
-                setTimeout(() => {
-                    switchHandle.classList.remove('flipping');
-                }, 300);
-            }
-            
-            // Update the corresponding weight knob underglow
-            updateWeightKnobUnderglow(row, col, newValue);
-            
-            // Send update to server
-            updateInput(row, col, newValue);
-        });
+        cell.addEventListener('click', handleGridCellClick);
     });
+    
+    // Reusable handler for grid cell clicks
+    function handleGridCellClick() {
+        const row = parseInt(this.dataset.row);
+        const col = parseInt(this.dataset.col);
+        const currentValue = parseInt(this.dataset.value);
+        const newValue = currentValue === 1 ? 0 : 1;
+        
+        // Update visual state
+        this.dataset.value = newValue;
+        
+        // Play switch flip sound effect
+        playSound('switch-sound');
+        
+        // Add a slight bounce animation to the switch handle
+        const switchHandle = this.querySelector('.switch-handle');
+        if (switchHandle) {
+            switchHandle.classList.add('flipping');
+            setTimeout(() => {
+                switchHandle.classList.remove('flipping');
+            }, 300);
+        }
+        
+        // Update the corresponding weight knob underglow
+        updateWeightKnobUnderglow(row, col, newValue);
+        
+        // Send update to server
+        updateInput(row, col, newValue);
+    }
     
     // Setup weight knob rotation handlers
     const weightKnobs = document.querySelectorAll('.weight-knob');
@@ -378,53 +327,58 @@ document.addEventListener('DOMContentLoaded', function() {
     const minusButtons = document.querySelectorAll('.knob-button.minus');
     const plusButtons = document.querySelectorAll('.knob-button.plus');
     
+    // Helper function to adjust weight knob by increment
+    function adjustWeightKnob(row, col, direction) {
+        const knob = document.getElementById(`weight-${row}-${col}`);
+        const currentValue = parseFloat(knob.dataset.value) || 0;
+        const learningRate = parseFloat(document.getElementById('learning-rate').value) || 0.1;
+        
+        // Calculate new value based on direction (1 for increment, -1 for decrement)
+        let newValue = currentValue + (direction * learningRate);
+        // Clamp value between -3 and 3
+        newValue = Math.max(-3, Math.min(3, newValue));
+        
+        updateKnobRotation(knob, newValue);
+        document.getElementById(`weight-${row}-${col}-value`).textContent = newValue.toFixed(2);
+        updateWeight(row, col, newValue);
+    }
+    
+    // Helper function to adjust bias knob by increment
+    function adjustBiasKnob(direction) {
+        const biasKnob = document.getElementById('bias-knob');
+        const currentValue = parseFloat(biasKnob.dataset.value) || 0;
+        const learningRate = parseFloat(document.getElementById('learning-rate').value) || 0.1;
+        
+        // Calculate new value based on direction (1 for increment, -1 for decrement)
+        let newValue = currentValue + (direction * learningRate);
+        // Clamp value between -3 and 3
+        newValue = Math.max(-3, Math.min(3, newValue));
+        
+        updateKnobRotation(biasKnob, newValue);
+        document.getElementById('bias-value').textContent = newValue.toFixed(2);
+        updateBias(newValue);
+    }
+    
+    // Helper function to play a sound
+    function playSound(soundId) {
+        const sound = document.getElementById(soundId);
+        if (sound) {
+            sound.currentTime = 0;
+            sound.play();
+        }
+    }
+    
     minusButtons.forEach(button => {
         button.addEventListener('click', function() {
             // If it's for the bias knob
             if (this.id === 'bias-minus') {
-                const biasKnob = document.getElementById('bias-knob');
-                const currentValue = parseFloat(biasKnob.dataset.value) || 0;
-                const learningRate = parseFloat(document.getElementById('learning-rate').value) || 0.1;
-                
-                // Decrement by learning rate value
-                let newValue = currentValue - learningRate;
-                // Clamp value between -3 and 3
-                newValue = Math.max(-3, Math.min(3, newValue));
-                
-                // Update knob rotation
-                updateKnobRotation(biasKnob, newValue);
-                
-                // Update display value
-                document.getElementById('bias-value').textContent = newValue.toFixed(2);
-                
-                // Send update to server
-                updateBias(newValue);
+                adjustBiasKnob(-1);
             } 
             // Otherwise it's for a weight knob
             else {
                 const row = parseInt(this.dataset.row);
                 const col = parseInt(this.dataset.col);
-                const knobSelector = `.weight-knob[data-row="${row}"][data-col="${col}"]`;
-                const knob = document.querySelector(knobSelector);
-                
-                if (knob) {
-                    const currentValue = parseFloat(knob.dataset.value) || 0;
-                    const learningRate = parseFloat(document.getElementById('learning-rate').value) || 0.1;
-                    
-                    // Decrement by learning rate value
-                    let newValue = currentValue - learningRate;
-                    // Clamp value between -3 and 3
-                    newValue = Math.max(-3, Math.min(3, newValue));
-                    
-                    // Update knob rotation
-                    updateKnobRotation(knob, newValue);
-                    
-                    // Update display value
-                    document.getElementById(`weight-${row}-${col}-value`).textContent = newValue.toFixed(2);
-                    
-                    // Send update to server
-                    updateWeight(row, col, newValue);
-                }
+                adjustWeightKnob(row, col, -1);
             }
         });
     });
@@ -433,49 +387,13 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             // If it's for the bias knob
             if (this.id === 'bias-plus') {
-                const biasKnob = document.getElementById('bias-knob');
-                const currentValue = parseFloat(biasKnob.dataset.value) || 0;
-                const learningRate = parseFloat(document.getElementById('learning-rate').value) || 0.1;
-                
-                // Increment by learning rate value
-                let newValue = currentValue + learningRate;
-                // Clamp value between -3 and 3
-                newValue = Math.max(-3, Math.min(3, newValue));
-                
-                // Update knob rotation
-                updateKnobRotation(biasKnob, newValue);
-                
-                // Update display value
-                document.getElementById('bias-value').textContent = newValue.toFixed(2);
-                
-                // Send update to server
-                updateBias(newValue);
+                adjustBiasKnob(1);
             } 
             // Otherwise it's for a weight knob
             else {
                 const row = parseInt(this.dataset.row);
                 const col = parseInt(this.dataset.col);
-                const knobSelector = `.weight-knob[data-row="${row}"][data-col="${col}"]`;
-                const knob = document.querySelector(knobSelector);
-                
-                if (knob) {
-                    const currentValue = parseFloat(knob.dataset.value) || 0;
-                    const learningRate = parseFloat(document.getElementById('learning-rate').value) || 0.1;
-                    
-                    // Increment by learning rate value
-                    let newValue = currentValue + learningRate;
-                    // Clamp value between -3 and 3
-                    newValue = Math.max(-3, Math.min(3, newValue));
-                    
-                    // Update knob rotation
-                    updateKnobRotation(knob, newValue);
-                    
-                    // Update display value
-                    document.getElementById(`weight-${row}-${col}-value`).textContent = newValue.toFixed(2);
-                    
-                    // Send update to server
-                    updateWeight(row, col, newValue);
-                }
+                adjustWeightKnob(row, col, 1);
             }
         });
     });
