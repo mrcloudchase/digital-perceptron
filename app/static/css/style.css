@@ -1,0 +1,324 @@
+/* Rosenblatt experiment specific styling */
+.pattern-dual-display {
+    display: flex;
+    justify-content: space-around;
+    margin: 15px 0;
+}
+
+.pattern-container {
+    text-align: center;
+    padding: 10px;
+    background: rgba(30, 30, 30, 0.7);
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+}
+
+.pattern-label {
+    margin: 5px 0;
+    font-family: "Special Elite", monospace;
+    text-align: center;
+}
+
+.pattern-label.positive {
+    color: #4caf50;
+}
+
+.pattern-label.negative {
+    color: #f44336;
+}
+
+.experiment-description {
+    font-style: italic;
+    margin-top: 15px;
+    text-align: center;
+    font-size: 0.9em;
+    color: #aaa;
+    line-height: 1.5;
+}
+
+.test-patterns-container {
+    margin-top: 20px;
+    background: rgba(20, 20, 20, 0.8);
+    border-radius: 5px;
+    border: 1px solid #333;
+    padding: 10px;
+}
+
+.pattern-test-results {
+    display: flex;
+    justify-content: space-around;
+}
+
+.pattern-test {
+    text-align: center;
+    padding: 10px;
+}
+
+.test-result {
+    margin-top: 10px;
+    font-family: "Special Elite", monospace;
+}
+
+.test-result .correct {
+    color: #4caf50;
+    font-weight: bold;
+}
+
+.test-result .incorrect {
+    color: #f44336;
+    font-weight: bold;
+}
+
+/* Historical touches */
+.historical-note {
+    font-family: "Special Elite", monospace;
+    font-size: 0.85em;
+    color: #bbb;
+    text-align: center;
+    margin: 15px 0;
+    padding: 10px;
+    border-top: 1px dotted #444;
+    border-bottom: 1px dotted #444;
+}
+
+/* Similarity display in manual test results */
+.similarity-bar {
+    width: 100%;
+    background: rgba(50, 50, 50, 0.5);
+    height: 10px;
+    border-radius: 5px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.similarity-fill {
+    height: 100%;
+    background: linear-gradient(to right, #ffb300, #ff9800);
+    transition: width 0.3s ease;
+}
+
+/* New steampunk notification for historical context */
+.steampunk-historical {
+    position: relative;
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(30, 20, 10, 0.9);
+    border: 1px solid #634b1d;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+}
+
+.steampunk-historical h3 {
+    font-family: "Special Elite", monospace;
+    margin-top: 0;
+    color: #ffd700;
+}
+
+.steampunk-historical p {
+    margin: 8px 0;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+.steampunk-historical:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, transparent 80%, rgba(255, 215, 0, 0.15));
+    pointer-events: none;
+}
+
+/* Vintage photo frame for the Rosenblatt image */
+.historical-image {
+    margin: 15px auto;
+    max-width: 300px;
+    padding: 10px;
+    background: #111;
+    border: 1px solid #333;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+    transform: rotate(-2deg);
+}
+
+.historical-image img {
+    width: 100%;
+    filter: sepia(0.5) contrast(1.1);
+}
+
+.historical-image .caption {
+    text-align: center;
+    padding: 5px 0;
+    font-family: "Special Elite", monospace;
+    font-size: 0.8em;
+    font-style: italic;
+    color: #aaa;
+}
+
+/* Improve mini-grid display */
+.mini-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    width: 80px;
+    height: 80px;
+    gap: 2px;
+    margin: 0 auto;
+}
+
+.mini-cell {
+    background: rgba(40, 40, 40, 0.7);
+    border: 1px solid #333;
+    transition: background-color 0.2s;
+}
+
+.mini-cell.active {
+    background-color: #ffd700;
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+}
+
+/* Vintage labels for T and J patterns */
+.t-pattern::before,
+.j-pattern::before {
+    content: "T";
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: "Special Elite", monospace;
+    font-size: 16px;
+    color: #ffd700;
+    text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+}
+
+.j-pattern::before {
+    content: "J";
+}
+
+/* Show historical context when auto training is active */
+.auto-train-active .main-title::after {
+    content: "Recreating Rosenblatt's 1958 Experiment";
+    display: block;
+    font-size: 0.6em;
+    font-style: italic;
+    color: #ff9800;
+    margin-top: 5px;
+}
+
+/* Mini-grid container for multiple patterns */
+.mini-grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin: 10px 0;
+}
+
+.mini-grid-wrapper {
+    position: relative;
+    padding: 8px;
+    background: rgba(20, 20, 20, 0.5);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.mini-grid-wrapper:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Pattern type labels */
+.pattern-type-label {
+    margin-bottom: 10px;
+    font-family: "Special Elite", monospace;
+    text-align: center;
+    font-size: 1.1em;
+    padding: 5px;
+    border-bottom: 1px dotted #444;
+}
+
+.pattern-type-label.positive {
+    color: #4caf50;
+    border-color: #4caf50;
+}
+
+.pattern-type-label.negative {
+    color: #f44336;
+    border-color: #f44336;
+}
+
+/* Pattern polarity selector */
+.pattern-polarity-selector {
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(30, 20, 10, 0.7);
+    border-radius: 5px;
+    border: 1px solid #333;
+}
+
+.selector-label {
+    font-family: "Special Elite", monospace;
+    text-align: center;
+    color: #ffd700;
+    margin-bottom: 8px;
+}
+
+.selector-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.radio-container {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.radio-container:hover {
+    background-color: rgba(255, 215, 0, 0.1);
+}
+
+.radio-container input[type="radio"] {
+    margin-right: 10px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #666;
+    border-radius: 50%;
+    outline: none;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.radio-container input[type="radio"]:checked {
+    border-color: #ffd700;
+}
+
+.radio-container input[type="radio"]:checked::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ffd700;
+}
+
+.radio-label {
+    font-family: "Special Elite", monospace;
+    font-size: 0.85em;
+    color: #ddd;
+}
+
+/* Testing results display enhancements */
+.partial {
+    color: #ff9800; /* Orange for partial success */
+} 

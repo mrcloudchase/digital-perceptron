@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Perceptron Machine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Oswald&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Digital Perceptron Machine</h1>
+            <div class="subtitle">A Steampunk Neural Network Simulator</div>
+        </header>
+        
+        <div class="main-panel">
+            <!-- Left Column: Input Grid -->
+            <div class="panel-column">
+                <div class="panel-section input-grid-section">
+                    <h2>Input Grid</h2>
+                    <p class="section-description">Click on switches to toggle inputs (0 or 1)</p>
+                    
+                    <!-- Grid Size Selector -->
+                    <div class="grid-size-control">
+                        <label for="grid-rows">Grid Dimensions:</label>
+                        <div class="grid-size-inputs">
+                            <input type="number" id="grid-rows" min="2" max="10" value="4" class="grid-dimension-input">
+                            <span class="grid-dimension-separator">×</span>
+                            <input type="number" id="grid-cols" min="2" max="10" value="4" class="grid-dimension-input">
+                            <button id="apply-grid-size" class="brass-button">Apply</button>
+                        </div>
+                        <div class="grid-stats">
+                            <span>Total Inputs: <span id="total-inputs">16</span></span>
+                            <span>Total Weights (with bias): <span id="total-weights">17</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-grid">
+                        {% for row in range(4) %}
+                            {% for col in range(4) %}
+                                <div class="grid-cell" data-row="{{ row }}" data-col="{{ col }}" data-value="0">
+                                    <div class="switch-handle"></div>
+                                    <div class="rivet-1"></div>
+                                    <div class="rivet-2"></div>
+                                    <div class="rivet-3"></div>
+                                    <div class="rivet-4"></div>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="panel-section">
+                    <div class="button-container">
+                        <button id="reset-button" class="brass-button">Reset Perceptron</button>
+                        <button id="randomize-button" class="brass-button">Randomize Weights</button>
+                        <button id="toggle-auto-training-btn" class="brass-button">Auto Training Mode</button>
+                    </div>
+                </div>
+                
+                <div class="panel-section">
+                    <h2>Learning Rate</h2>
+                    <p class="section-description">Adjust step size for parameter changes</p>
+                    <div class="learning-rate-control">
+                        <input type="range" id="learning-rate" min="0.01" max="0.5" step="0.01" value="0.1">
+                        <span id="learning-rate-value">0.10</span>
+                    </div>
+                </div>
+                
+                <!-- Auto Training Controls Section -->
+                <div id="auto-training-controls" class="panel-section auto-training-section hidden">
+                    <h2>Auto Training</h2>
+                    <p class="section-description">Configure automatic perceptron training</p>
+                    
+                    <div class="auto-training-main-controls">
+                        <div class="target-pattern-section">
+                            <button id="set-target-pattern" class="brass-button">Set Current as Target Pattern</button>
+                            <div id="target-pattern-display" class="target-pattern-display">
+                                <div class="pattern-label">Target Pattern (Not Set)</div>
+                                <div class="mini-grid"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="training-controls">
+                            <h3>Training Parameters</h3>
+                            <div class="training-control-row">
+                                <label for="training-speed">Training Speed:</label>
+                                <input type="range" id="training-speed" min="1" max="50" value="10">
+                                <span id="training-speed-value">10 patterns/sec</span>
+                            </div>
+                            
+                            <div class="training-control-row">
+                                <label for="max-iterations">Max Iterations:</label>
+                                <input type="number" id="max-iterations" min="10" max="1000" value="100">
+                            </div>
+                            
+                            <div class="training-meters">
+                                <div class="training-metric">
+                                    <label>Iterations:</label>
+                                    <div id="iteration-counter" class="steampunk-counter">000</div>
+                                </div>
+                                <div class="training-metric">
+                                    <label>Accuracy:</label>
+                                    <div id="accuracy-meter" class="steampunk-meter">
+                                        <div class="meter-fill"></div>
+                                        <div class="meter-value">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="training-buttons">
+                                <button id="start-training">Start Training</button>
+                                <button id="pause-training" disabled>Pause</button>
+                                <button id="reset-training" disabled>Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Middle Column: Weights and Bias -->
+            <div class="panel-column">
+                <div class="panel-section weight-section">
+                    <h2>Weights</h2>
+                    <p class="section-description">Adjust knobs to modify weights</p>
+                    <div class="weight-grid">
+                        {% for row in range(4) %}
+                            {% for col in range(4) %}
+                                <div class="weight-control">
+                                    <div class="knob-control-group">
+                                        <button class="knob-button minus" data-row="{{ row }}" data-col="{{ col }}">-</button>
+                                        <div class="weight-knob knob" id="weight-{{ row }}-{{ col }}" data-row="{{ row }}" data-col="{{ col }}" data-value="0">
+                                            <div class="knob-indicator"></div>
+                                        </div>
+                                        <button class="knob-button plus" data-row="{{ row }}" data-col="{{ col }}">+</button>
+                                    </div>
+                                    <div class="weight-value" id="weight-{{ row }}-{{ col }}-value">0.00</div>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="panel-section bias-section">
+                    <h2>Bias</h2>
+                    <p class="section-description">Adjust threshold for activation</p>
+                    <div class="bias-control">
+                        <div class="knob-control-group">
+                            <button class="knob-button minus" id="bias-minus">-</button>
+                            <div class="knob" id="bias-knob" data-value="0">
+                                <div class="knob-indicator"></div>
+                            </div>
+                            <button class="knob-button plus" id="bias-plus">+</button>
+                        </div>
+                        <div class="bias-value" id="bias-value">0.00</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column: Output Elements -->
+            <div class="panel-column">
+                <div class="panel-section output-section">
+                    <h2>Output</h2>
+                    <div class="output-display">
+                        <div class="meter">
+                            <div class="meter-scale">
+                                <div class="meter-label">-3</div>
+                                <div class="meter-label">0</div>
+                                <div class="meter-label">+3</div>
+                            </div>
+                            <div class="meter-needle" id="meter-needle"></div>
+                        </div>
+                        <div class="net-input">
+                            <span>Net Input (z):</span>
+                            <span id="net-input-value">0.00</span>
+                        </div>
+                        <div class="output-value" id="output-value">Output = 0</div>
+                        <div class="output-light-container">
+                            <div class="output-light" id="output-light"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel-section">
+                    <button id="experiment-instructions-button" class="brass-button">Show Rosenblatt's Experiment</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="tutorialOverlay" class="tutorial-overlay">
+            <div class="tutorial-content">
+                <h2>Welcome to the Digital Perceptron Machine!</h2>
+                <p>This simulator lets you explore how a single neuron (perceptron) works:</p>
+                <ol>
+                    <li><strong>Input Grid:</strong> Flip the steampunk switches to toggle between 0 (off) and 1 (on)</li>
+                    <li><strong>Weights:</strong> Adjust knobs to change how important each input is</li>
+                    <li><strong>Bias:</strong> Sets the activation threshold</li>
+                    <li><strong>Learning Rate:</strong> Controls how quickly parameters change</li>
+                </ol>
+                <p>The output activates (turns on) when the weighted sum of inputs plus bias is greater than zero.</p>
+                <button id="closeTutorial" class="brass-button">Start Experimenting</button>
+            </div>
+        </div>
+        
+        <div id="experimentInstructionsOverlay" class="tutorial-overlay">
+            <div class="tutorial-content experiment-instructions">
+                <h2>Frank Rosenblatt's Original Perceptron Experiment (1958)</h2>
+                
+                <div class="history-note">
+                    <p>In 1958, Frank Rosenblatt developed the first perceptron at the Cornell Aeronautical Laboratory. The Mark I Perceptron was a machine designed to simulate a hypothetical nervous system. This simulator recreates one of his fundamental classification experiments with the exact procedure he originally developed.</p>
+                </div>
+                
+                <ol>
+                    <li><strong>Step 1: Pattern Presentation</strong>
+                        <p>Rosenblatt's original experiment used two distinct stimulus patterns:</p>
+                        
+                        <div class="example-patterns">
+                            <div class="example-pattern">
+                                <div class="pattern-name">Horizontal Line (Class I)</div>
+                                <div class="pattern-grid t-pattern">
+                                    <div class="pattern-cell" data-coord="(0,0)"></div>
+                                    <div class="pattern-cell" data-coord="(1,0)"></div>
+                                    <div class="pattern-cell" data-coord="(2,0)"></div>
+                                    <div class="pattern-cell" data-coord="(3,0)"></div>
+                                    <div class="pattern-cell active" data-coord="(0,1)"></div>
+                                    <div class="pattern-cell active" data-coord="(1,1)"></div>
+                                    <div class="pattern-cell active" data-coord="(2,1)"></div>
+                                    <div class="pattern-cell active" data-coord="(3,1)"></div>
+                                    <div class="pattern-cell" data-coord="(0,2)"></div>
+                                    <div class="pattern-cell" data-coord="(1,2)"></div>
+                                    <div class="pattern-cell" data-coord="(2,2)"></div>
+                                    <div class="pattern-cell" data-coord="(3,2)"></div>
+                                    <div class="pattern-cell" data-coord="(0,3)"></div>
+                                    <div class="pattern-cell" data-coord="(1,3)"></div>
+                                    <div class="pattern-cell" data-coord="(2,3)"></div>
+                                    <div class="pattern-cell" data-coord="(3,3)"></div>
+                                </div>
+                                <button class="pattern-apply-button" data-pattern="t">Apply Horizontal Line</button>
+                            </div>
+                            <div class="example-pattern">
+                                <div class="pattern-name">Vertical Line (Class II)</div>
+                                <div class="pattern-grid j-pattern">
+                                    <div class="pattern-cell" data-coord="(0,0)"></div>
+                                    <div class="pattern-cell active" data-coord="(1,0)"></div>
+                                    <div class="pattern-cell" data-coord="(2,0)"></div>
+                                    <div class="pattern-cell" data-coord="(3,0)"></div>
+                                    <div class="pattern-cell" data-coord="(0,1)"></div>
+                                    <div class="pattern-cell active" data-coord="(1,1)"></div>
+                                    <div class="pattern-cell" data-coord="(2,1)"></div>
+                                    <div class="pattern-cell" data-coord="(3,1)"></div>
+                                    <div class="pattern-cell" data-coord="(0,2)"></div>
+                                    <div class="pattern-cell active" data-coord="(1,2)"></div>
+                                    <div class="pattern-cell" data-coord="(2,2)"></div>
+                                    <div class="pattern-cell" data-coord="(3,2)"></div>
+                                    <div class="pattern-cell" data-coord="(0,3)"></div>
+                                    <div class="pattern-cell active" data-coord="(1,3)"></div>
+                                    <div class="pattern-cell" data-coord="(2,3)"></div>
+                                    <div class="pattern-cell" data-coord="(3,3)"></div>
+                                </div>
+                                <button class="pattern-apply-button" data-pattern="j">Apply Vertical Line</button>
+                            </div>
+                        </div>
+                        
+                        <div class="key-insights">
+                            <h4>Original Experimental Setup:</h4>
+                            <ul>
+                                <li><strong>Class I (Response = 1):</strong> Horizontal line pattern shown above</li>
+                                <li><strong>Class II (Response = 0):</strong> Vertical line pattern shown above</li>
+                                <li><strong>Sensory Units:</strong> In the original experiment, these were photocells that detected light patterns</li>
+                            </ul>
+                        </div>
+                    </li>
+                    
+                    <li><strong>Step 2: Initialize the Perceptron</strong>
+                        <p>As in Rosenblatt's original work, initialize all association weights to zero by clicking the "Reset Perceptron" button. Set learning rate to 0.1.</p>
+                        <p class="success-tip">Rosenblatt emphasized that learning must start from a neutral state with no prior knowledge embedded in the weights.</p>
+                    </li>
+                    
+                    <li><strong>Step 3: Training Procedure (Perceptron Convergence Procedure)</strong>
+                        <p>Follow Rosenblatt's original training algorithm with complete weight adjustments:</p>
+                        
+                        <div class="training-steps">
+                            <div class="training-step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    Present the horizontal line pattern (Class I) by clicking "Apply Horizontal Line"
+                                </div>
+                            </div>
+                            <div class="training-step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <strong>If the output is not positive (should be):</strong>
+                                    <ul>
+                                        <li>Press the + buttons for weights at active positions: (0,1), (1,1), (2,1), and (3,1)</li>
+                                        <li>Press the - buttons for weights at inactive positions (all other cells)</li>
+                                        <li>Press the + button for bias to shift the threshold</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="training-step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    Present the vertical line pattern (Class II) by clicking "Apply Vertical Line"
+                                </div>
+                            </div>
+                            <div class="training-step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <strong>If the output is positive (should not be):</strong>
+                                    <ul>
+                                        <li>Press the - buttons for weights at active positions: (1,0), (1,1), (1,2), and (1,3)</li>
+                                        <li>Press the + buttons for weights at inactive positions (all other cells)</li>
+                                        <li>Press the - button for bias to shift the threshold</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="training-step">
+                                <div class="step-number">5</div>
+                                <div class="step-content">
+                                    Repeat steps 1-4 with alternating patterns until both are correctly classified
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="learning-explanation">
+                            <h3>Rosenblatt's Complete Weight Adjustment Rule</h3>
+                            <p>Rosenblatt's experiments showed that complete weight adjustment is most effective:</p>
+                            <ul>
+                                <li><strong>For positive patterns:</strong> Strengthen weights for active inputs and weaken weights for inactive inputs</li>
+                                <li><strong>For negative patterns:</strong> Weaken weights for active inputs and strengthen weights for inactive inputs</li>
+                                <li><strong>For bias:</strong> Adjust positive for positive patterns and negative for negative patterns</li>
+                            </ul>
+                            <p>This approach creates a stronger decision boundary between pattern classes and accelerates the learning process.</p>
+                        </div>
+                    </li>
+                    
+                    <li><strong>Step 4: Testing Phase</strong>
+                        <p>Once training is complete, Rosenblatt's testing procedure was to repeatedly present each pattern and verify reliable classification:</p>
+                        <ul class="classification-results">
+                            <li>Horizontal Line → Response = 1 (light turns ON)</li>
+                            <li>Vertical Line → Response = 0 (light stays OFF)</li>
+                        </ul>
+                        <p class="success-tip">Rosenblatt observed that the trained perceptron should develop positive weights for positions unique to the horizontal pattern, negative weights for positions unique to the vertical pattern, and a near-zero weight for the overlapping position.</p>
+                    </li>
+                </ol>
+                
+                <div class="troubleshooting">
+                    <h3>Rosenblatt's Technical Notes</h3>
+                    <ul>
+                        <li><strong>Consistent Errors:</strong> If both patterns give the same output, Rosenblatt recommended analyzing the "critical zone" (overlapping cell) and adjusting the threshold (bias) to break the symmetry</li>
+                        <li><strong>Slow Convergence:</strong> For patterns with many overlapping elements, Rosenblatt found that using incremental weight changes (small learning rate) improved reliability</li>
+                        <li><strong>Noise Resistance:</strong> Rosenblatt demonstrated that his perceptron learning rule is robust even when sensory units occasionally malfunction</li>
+                    </ul>
+                </div>
+                
+                <div class="key-insights">
+                    <h3>Historical Significance</h3>
+                    <p>This experiment is historically significant because:</p>
+                    <ul>
+                        <li>It represented the first time a machine could learn by experience rather than explicit programming</li>
+                        <li>Rosenblatt mathematically proved his perceptron learning procedure would always converge to a solution if one exists</li>
+                        <li>It laid the foundation for neural network research despite later criticisms by Minsky and Papert</li>
+                        <li>Modern deep learning is built on these fundamental principles first demonstrated by Rosenblatt</li>
+                    </ul>
+                </div>
+                
+                <button id="closeExperimentInstructions" class="brass-button">Close Instructions</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Audio elements for sound effects -->
+    <audio id="switch-sound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/switch-click.mp3') }}" type="audio/mpeg">
+    </audio>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 
